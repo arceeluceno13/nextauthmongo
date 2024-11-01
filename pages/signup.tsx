@@ -5,24 +5,19 @@ import Button from "../components/Common/Button";
 import CheckInput from "../components/Common/CheckInput";
 import InputWithLabel from "../components/Common/InputWithLabel";
 import GoogleSigninButton from "../components/Common/GoogleSigninButton";
-
 import { getSession, signIn } from "next-auth/react";
-
 import { useFormik } from "formik";
 import signup_validation from "../lib/formikValidation/signup_validation";
 import InputErrorMessage from "../components/Utils/InputErrorMessage";
-import axios from "axios";
+import axiosInstance from "../lib/axiosInstance";
 import { useRouter } from "next/router";
 import TostMessage from "../components/Utils/TostMessage";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 
-import axiosInstance from "../lib/axiosInstance";
-
-const signup = () => {
+const Signup = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -34,7 +29,7 @@ const signup = () => {
     validate: signup_validation,
   });
 
-  function signup(values: any) {
+  function signup(values) {
     setLoading(true);
 
     axiosInstance
@@ -54,11 +49,9 @@ const signup = () => {
           TostMessage("Successfully Registered!", "success");
         });
       })
-      .catch((error: any) => {
+      .catch((error) => {
         const errorMessage = error?.response?.data?.message;
-        if (errorMessage || error?.message) {
-          setError(errorMessage || error?.message);
-        }
+        setError(errorMessage || error?.message || "An error occurred");
       })
       .finally(() => {
         setLoading(false);
@@ -76,11 +69,10 @@ const signup = () => {
           <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                Create and account
+                Create an account
               </h1>
               {error && (
                 <p className="text-red-500 flex items-center gap-x-2">
-                  <FontAwesomeIcon icon={faExclamationCircle} />
                   <span>{error}</span>
                 </p>
               )}
@@ -97,7 +89,6 @@ const signup = () => {
                     {...formik.getFieldProps("email")}
                     name="email"
                   />
-
                   <InputErrorMessage
                     touched={formik.touched.email}
                     error={formik.errors.email}
@@ -112,7 +103,6 @@ const signup = () => {
                     {...formik.getFieldProps("name")}
                     name="name"
                   />
-
                   <InputErrorMessage
                     touched={formik.touched.name}
                     error={formik.errors.name}
@@ -127,7 +117,6 @@ const signup = () => {
                     {...formik.getFieldProps("password")}
                     name="password"
                   />
-
                   <InputErrorMessage
                     touched={formik.touched.password}
                     error={formik.errors.password}
@@ -160,10 +149,10 @@ const signup = () => {
                   />
                 </div>
 
-                <Button type="submit" loading={loading}>
-                  Create an account
+                <Button type="submit">
+                  {loading ? "Creating Account..." : "Create an account"}
                 </Button>
-              </form>{" "}
+              </form>
               <GoogleSigninButton />
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 <span className="mr-1">Already have an account?</span>
@@ -182,9 +171,9 @@ const signup = () => {
   );
 };
 
-export default signup;
+export default Signup;
 
-export async function getServerSideProps({ req }: { req: any }) {
+export async function getServerSideProps({ req }) {
   const session = await getSession({ req });
   if (session) {
     return {

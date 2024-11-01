@@ -1,52 +1,38 @@
-import Head from "next/head";
-import Link from "next/link";
-import React, { useState } from "react";
-import Button from "../components/Common/Button";
-import InputWithLabel from "../components/Common/InputWithLabel";
-import { getSession } from "next-auth/react";
-import GoogleSigninButton from "../components/Common/GoogleSigninButton";
+import React from 'react';
+import Head from 'next/head';
+import { useFormik } from 'formik';
+import { useRouter } from 'next/router';
+import { signIn } from 'next-auth/react';
 
-import { useFormik } from "formik";
-import login_validation from "../lib/formikValidation/login_validation";
-import InputErrorMessage from "../components/Utils/InputErrorMessage";
-import { GetServerSideProps } from "next";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/router";
-import TostMessage from "../components/Utils/TostMessage";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-
-const login = () => {
+const Login = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
   const formik = useFormik({
     initialValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-    validate: login_validation,
-    onSubmit: LoginSubmit,
+    onSubmit: async (values) => {
+      setLoading(true);
+      setError(null); // Reset error state before attempting login
+      try {
+        const status = await signIn('credentials', {
+          email: values.email,
+          password: values.password,
+          redirect: false, // Prevent default redirection
+        });
+        if (status?.error) throw new Error(status.error);
+        if (status?.ok) router.push("/");
+        setLoading(false);
+        TostMessage("Login Successful!", "success");
+      } catch (error: any) {
+        setError(error.message);
+        setLoading(false);
+      }
+    },
   });
-
-  async function LoginSubmit(values: any) {
-    setLoading(true);
-    try {
-      const status = await signIn("credentials", {
-        redirect: false,
-        email: values.email,
-        password: values.password,
-        callbackUrl: "/",
-      });
-      if (status?.error) throw Error(status?.error);
-      if (status?.ok) router.push("/");
-      setLoading(false);
-      TostMessage("Login Successful!", "success");
-    } catch (error: any) {
-      setError(error?.message);
-      setLoading(false);
-    }
-  }
 
   return (
     <>
@@ -74,7 +60,7 @@ const login = () => {
                   {...formik.getFieldProps("email")}
                 />
                 {formik.touched.email && formik.errors.email ? (
-                  <InputErrorMessage>{formik.errors.email}</InputErrorMessage>
+                  <div className="text-red-500 text-sm">{formik.errors.email}</div>
                 ) : null}
               </div>
               <div className="text-gray-200/50 text-lg md:text-xl lg:text-2xl font-normal font-['Poppins'] mt-6">Password</div>
@@ -87,9 +73,12 @@ const login = () => {
                   {...formik.getFieldProps("password")}
                 />
                 {formik.touched.password && formik.errors.password ? (
-                  <InputErrorMessage>{formik.errors.password}</InputErrorMessage>
+                  <div className="text-red-500 text-sm">{formik.errors.password}</div>
                 ) : null}
               </div>
+              {error && (
+                <div className="text-red-500 text-sm mt-4">{error}</div>
+              )}
               <button
                 type="submit"
                 className="w-full h-16 bg-emerald-700 text-white text-lg md:text-xl lg:text-2xl font-bold font-['Poppins'] rounded-lg shadow mt-6"
@@ -98,19 +87,6 @@ const login = () => {
                 {loading ? "Logging in..." : "Log in"}
               </button>
             </form>
-            <div className="text-gray-200 text-base md:text-lg lg:text-xl font-normal font-['Poppins'] mt-4 flex justify-center">
-              <Link href="/forgot-password" legacyBehavior>
-                <a className="underline">Forgot Password?</a>
-              </Link>
-            </div>
-            <button className="w-full h-16 bg-emerald-700 text-white text-lg md:text-xl lg:text-2xl font-bold font-['Poppins'] rounded-lg shadow mt-6">
-              Create an account
-            </button>
-            {error && (
-              <p className="error text-red-500 text-center mt-4">
-                <FontAwesomeIcon icon={faExclamationCircle} /> {error}
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -118,19 +94,4 @@ const login = () => {
   );
 };
 
-export default login;
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getSession({ req: context.req });
-  if (session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: { session },
-  };
-};
+export default Login;
