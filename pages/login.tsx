@@ -41,7 +41,7 @@ const login = () => {
       if (status?.error) throw Error(status?.error);
       if (status?.ok) router.push("/");
       setLoading(false);
-      TostMessage("Login Successfull!", "success");
+      TostMessage("Login Successful!", "success");
     } catch (error: any) {
       setError(error?.message);
       setLoading(false);
@@ -54,84 +54,70 @@ const login = () => {
         <title>Login your account</title>
       </Head>
 
-      <section className="bg-gray-50 py-12 dark:bg-gray-900">
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto">
-          <div className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-            <span className="mr-2">Login to</span>
-            <img
-              className="w-8 h-8 mr-2"
-              src="https://cdn-icons-png.flaticon.com/512/1372/1372789.png"
-              alt="logo"
-            />
-            <span className="text-primary-700">SR</span>
-            <span className="text-red-400 font-bold">BD</span>
-            <span className="text-primary-700">TOPUP</span>
-          </div>
-          <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-            <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-              {error && (
-                <p className="text-red-500 flex items-center gap-x-2">
-                  <FontAwesomeIcon icon={faExclamationCircle} />
-                  <span>{error}</span>
-                </p>
-              )}
-              <form
-                onSubmit={formik.handleSubmit}
-                className="space-y-4 md:space-y-6"
-                action="#"
-              >
-                <div>
-                  <InputWithLabel
-                    label="Email Address"
-                    placeholder="Email Address"
-                    type="email"
-                    {...formik.getFieldProps("email")}
-                    name="email"
-                  />
-
-                  <InputErrorMessage
-                    touched={formik.touched.email}
-                    error={formik.errors.email}
-                  />
-                </div>
-
-                <div>
-                  <InputWithLabel
-                    label="New Password"
-                    type="password"
-                    {...formik.getFieldProps("password")}
-                    name="password"
-                  />
-
-                  <InputErrorMessage
-                    touched={formik.touched.password}
-                    error={formik.errors.password}
-                  />
-                </div>
-
-                <Button type="submit" loading={loading}>
-                  Login
-                </Button>
-              </form>
-
-              <GoogleSigninButton />
-
-              <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                <span className="mr-1"> Don't have an account?</span>
-                <Link
-                  href="/signup"
-                  className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                >
-                  Create account!
-                </Link>
-              </p>
-            </div>
+      <div className="w-full h-screen relative bg-gray-200 flex flex-col lg:flex-row">
+        <div className="lg:w-1/2 flex flex-col justify-center items-start p-10 lg:p-20">
+          <div className="text-center text-emerald-700 text-4xl md:text-6xl lg:text-8xl xl:text-[115px] font-bold font-['Poppins']">Kwarta</div>
+          <div className="text-black text-lg md:text-xl lg:text-2xl xl:text-[32px] font-normal font-['Poppins'] mt-4 lg:mt-10">
+            Stay on top of your finances and take<br />control of your future.
           </div>
         </div>
-      </section>
+        <div className="lg:w-1/2 flex justify-center items-center bg-gradient-to-br from-emerald-700 to-gray-950 rounded-none lg:rounded-[41px] shadow p-10 lg:p-20">
+          <div className="w-full max-w-md">
+            <form onSubmit={formik.handleSubmit}>
+              <div className="text-gray-200/50 text-lg md:text-xl lg:text-2xl font-normal font-['Poppins']">Email</div>
+              <div className="w-full h-16 mt-2 rounded-lg border-2 border-gray-200/50">
+                <input
+                  type="email"
+                  id="email"
+                  required
+                  className="w-full h-full px-3 py-2 bg-transparent focus:outline-none text-gray-200"
+                  {...formik.getFieldProps("email")}
+                />
+                {formik.touched.email && formik.errors.email ? (
+                  <InputErrorMessage>{formik.errors.email}</InputErrorMessage>
+                ) : null}
+              </div>
+              <div className="text-gray-200/50 text-lg md:text-xl lg:text-2xl font-normal font-['Poppins'] mt-6">Password</div>
+              <div className="w-full h-16 mt-2 rounded-lg border-2 border-gray-200/50">
+                <input
+                  type="password"
+                  id="password"
+                  required
+                  className="w-full h-full px-3 py-2 bg-transparent focus:outline-none text-gray-200"
+                  {...formik.getFieldProps("password")}
+                />
+                {formik.touched.password && formik.errors.password ? (
+                  <InputErrorMessage>{formik.errors.password}</InputErrorMessage>
+                ) : null}
+              </div>
+              <button
+                type="submit"
+                className="w-full h-16 bg-emerald-700 text-white text-lg md:text-xl lg:text-2xl font-bold font-['Poppins'] rounded-lg shadow mt-6"
+                disabled={loading}
+              >
+                {loading ? "Logging in..." : "Log in"}
+              </button>
+            </form>
+            <div className="text-gray-200 text-base md:text-lg lg:text-xl font-normal font-['Poppins'] mt-4 flex justify-center">
+              <Link href="/forgot-password" legacyBehavior>
+                <a className="underline">Forgot Password?</a>
+              </Link>
+            </div>
+            <button className="w-full h-16 bg-emerald-700 text-white text-lg md:text-xl lg:text-2xl font-bold font-['Poppins'] rounded-lg shadow mt-6">
+              Create an account
+            </button>
+            {error && (
+              <p className="error text-red-500 text-center mt-4">
+                <FontAwesomeIcon icon={faExclamationCircle} /> {error}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     </>
   );
 };
+
 export default login;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
